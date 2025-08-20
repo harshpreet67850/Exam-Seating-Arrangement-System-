@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Seating Arrangement{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+      <h4 class="flex-grow-1 m-0">Seating Arrangement</h4>
+
+      <!-- Export buttons -->
+      <a href="{% url 'export_csv' %}" class="btn btn-outline-secondary">Export CSV</a>
+      <a href="{% url 'export_excel' %}" class="btn btn-outline-success">Export Excel</a>
+      <a href="{% url 'assign_seats' %}" class="btn btn-primary">Re-Assign Seats</a>
+    </div>
+
+    <!-- Filters -->
+    <form method="get" class="row g-2 mb-3">
+      <div class="col-12 col-md-3">
+        <input type="text" id="searchBox" class="form-control" placeholder="Type to search (name/roll/classroom)...">
+      </div>
+      <div class="col-6 col-md-3">
+        <select name="branch" id="branchFilter" class="form-select">
+          <option value="">All Branches</option>
+          {% for b in branches %}
+            <option value="{{ b }}" {% if request.GET.branch == b %}selected{% endif %}>{{ b }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <select name="semester" id="semesterFilter" class="form-select">
+          <option value="">All Semesters</option>
+          {% for s in semesters %}
+            <option value="{{ s }}" {% if request.GET.semester == s|stringformat:'s' %}selected{% endif %}>Sem {{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-md-3">
+        <button class="btn btn-dark w-100" type="submit">Apply Server Filter</button>
+      </div>
+    </form>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle" id="seatingTable">
+        <thead class="table-light">
+          <tr>
+            <th>Roll #</th>
+            <th>Name</th>
+            <th>Branch</th>
+            <th>Semester</th>
+            <th>Room</th>
+            <th>Seat</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for seat in seating %}
+          <tr>
+            <td>{{ seat.student.roll_number }}</td>
+            <td>{{ seat.student.name }}</td>
+            <td>{{ seat.student.branch }}</td>
+            <td>{{ seat.student.semester }}</td>
+            <td>{{ seat.classroom.room_number }}</td>
+            <td>{{ seat.seat_number }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted">No records found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Client-side quick filtering (text + dropdowns) without reload
+  (function(){
+    const table = document.getElementById('seatingTable');
+    const rows = Array.from(table.querySelectorAll('tbody tr'));
+    const q = document.getElementById('searchBox');
+    const branch = document.getElementById('branchFilter');
+    const sem = document.getElementById('semesterFilter');
+
+    function match(row, text, b, s) {
+      const t = row.innerText.toLowerCase();
+      const okText = !text || t.includes(text);
+      const td = row.querySelectorAll('td');
+      const rowBranch = td[2]?.innerText.trim().toLowerCase();
+      const rowSem = td[3]?.innerText.trim();
+      const okBranch = !b || rowBranch === b;
+      const okSem = !s || rowSem === s;
+      return okText && okBranch && okSem;
+    }
+
+    function filter() {
+      const text = q.value.trim().toLowerCase();
+      const b = branch.value.trim().toLowerCase();
+      const s = sem.value.trim();
+      let any = false;
+      rows.forEach(r => {
+        const show = match(r, text, b, s);
+        r.style.display = show ? '' : 'none';
+        if (show) any = true;
+      });
+      // empty-state row handling
+      const empty = table.querySelector('tbody tr._empty');
+      if (!any) {
+        if (!empty) {
+          const tr = document.createElement('tr');
+          tr.className = '_empty';
+          tr.innerHTML = `<td colspan="6" class="text-center text-muted">No matching results.</td>`;
+          table.querySelector('tbody').appendChild(tr);
+        }
+      } else {
+        empty && empty.remove();
+      }
+    }
+
+    q.addEventListener('input', filter);
+    branch.addEventListener('change', filter);
+    sem.addEventListener('change', filter);
+  })();
+</script>
+{% endblock %}

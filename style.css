@@ -1,0 +1,31 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: yellow !important;
+}
+;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+h1 {
+    color: #2c3e50;
+}
+
+a {
+    text-decoration: none;
+    color: #0066cc;
+    margin-right: 15px;
+    font-weight: bold;
+}
+
+a:hover {
+    color: #ff6600;
+}
+
+.container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}

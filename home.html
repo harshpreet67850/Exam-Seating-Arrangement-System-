@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Exam Seating</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Exam Seating Management</h1>
+
+        <a href="{% url 'home' %}">Home</a> |
+        <a href="{% url 'about' %}">About</a> |
+        <a href="{% url 'add_exam' %}">Add Exam</a> |
+        <a href="{% url 'view_seating' %}">View Seating</a>
+
+        <p>This is the Home Page.</p>
+    </div>
+</body>
+</html>
+
